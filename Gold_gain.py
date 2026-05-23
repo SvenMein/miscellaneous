@@ -22,4 +22,3 @@ for i in range(100):
     total_gold_gamble = round(total_gold_gamble, 2)
 
     print(f"Flat extra gold earned: {total_gold_flat}, \nExtra gold earned by gamble: {total_gold_gamble}")
-
