@@ -7,6 +7,10 @@ of a standard protein to determine the concentration of the unknown sample. It
 also includes methods for plotting the standard curve and calculating the concentration
 of the sample based on its absorbance reading.
 """
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
 # Standard sample concentrations in µg/µl
 standard_sample = [0, 200, 400, 600, 800, 1000]
 
@@ -31,12 +35,24 @@ for reading in absorbance_readings["C"]:
     value = (absorbance_readings["C"][reading] + absorbance_readings["D"][reading]) / 2
     mean_sample.append(value)
 
-# Currently no regression curve is calculated. It is on the to-do list. For now just simple line is used.
-# Calculate standard regression curve. On the x-axis we place the concentration, on y-axis the meassured absorbance
-slope = (mean_standard[1]-mean_standard[0]) / (standard_sample[1] - standard_sample[0])
+# Calculate regression line by least-squares.
+# y = mx + c
+# y = slope * mean_standard + intercept
+standard_values = np.array(standard_sample)
+mean_standard = np.array(mean_standard)
+regression = np.vstack([standard_values, np.ones(len(standard_values))]).T
+slope, intercept = np.linalg.lstsq(regression, mean_standard)[0]
 
-# Calculate y-axis intercept.
-intercept = mean_standard[0] - slope * standard_sample[0]
+# Plotting of standard sample and regressionline
+plt.figure()
+plt.plot(standard_values, mean_standard, ".", label="Original data", markersize=10)
+plt.plot(standard_values, slope*standard_values+intercept, "r", label="Fitted line")
+plt.title("Standard", y=1.02)
+plt.xlabel("protein concentration [µg/µl]")
+plt.ylabel("Absorbance [Au]")
+plt.legend()
+plt.show()
+plt.close()
 
 # Calculate sample concentration.
 sample_concentration = []
@@ -50,4 +66,4 @@ for elem in mean_sample:
 # Normalization so that samples will be 500 µl with a concentration of 50 µg/µl.
 # For this, we assume 750 µl sample is left after the protein assay.
 # cv = cv
-# conc / 50 µg/µl 
+# conc / 50 µg/µl
